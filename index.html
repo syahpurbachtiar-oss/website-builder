@@ -1,363 +1,223 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monas 3D Experience</title>
+    <title>Monas - Cinematic Experience</title>
     <style>
-        body { 
-            margin: 0; 
-            overflow: hidden; 
-            background-color: #030305; 
-            font-family: 'Inter', -apple-system, sans-serif; 
-            color: white;
-        }
-        canvas { 
-            display: block; 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            z-index: 1; 
-        }
-        
-        #ui-layer {
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
             height: 100%;
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center;
-            pointer-events: none; 
-            z-index: 10; 
-            opacity: 0; 
+            overflow: hidden;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: #87CEEB; /* Langit biru cerah */
         }
         
-        h1 {
-            font-size: clamp(3rem, 8vw, 7rem); 
-            letter-spacing: 2vw; 
-            font-weight: 100;
-            text-transform: uppercase; 
-            margin: 0; 
-            margin-left: 2vw; /* offset for tracking */
-            pointer-events: auto;
-            text-shadow: 0 0 40px rgba(255, 215, 0, 0.3); 
-            cursor: pointer;
-            transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
-            background: linear-gradient(180deg, #ffffff 0%, #a0a0a0 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        /* 
+         * Background Container:
+         * Menggunakan foto asli Jakarta/Monas dengan suasana siang hari.
+         * Diperbesar (scale 1.1) untuk memberi ruang bagi pergerakan parallax.
+         */
+        .background-container {
+            position: absolute;
+            top: -5%;
+            left: -5%;
+            width: 110%;
+            height: 110%;
+            /* Placeholder gambar Monas/Jakarta (Siang hari cerah) */
+            background-image: url('https://images.unsplash.com/photo-1577971132997-c10be9372519?q=80&w=2500&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.1s ease-out;
+            z-index: 1;
+            filter: brightness(1.05) contrast(1.1); /* Sedikit lebih cerah */
         }
         
-        h1:hover { 
-            letter-spacing: 2.5vw; 
-            text-shadow: 0 0 60px rgba(255, 215, 0, 0.8); 
-            transform: scale(1.05);
+        /* Lapisan tipis agar teks tetap terbaca tanpa membuat gelap */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.7) 100%);
+            z-index: 2;
+            pointer-events: none;
         }
         
-        .subtitle {
-            letter-spacing: 8px; 
-            font-size: clamp(0.7rem, 1.5vw, 1rem); 
-            margin-top: 20px;
-            text-transform: uppercase; 
-            font-weight: 300;
-            color: #888;
-            border-top: 1px solid rgba(255,255,255,0.2);
-            padding-top: 20px;
-        }
-
-        #loading {
+        .content {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-family: monospace;
-            letter-spacing: 5px;
-            color: #ffaa00;
-            z-index: 20;
-            transition: opacity 1s;
+            z-index: 3;
+            text-align: center;
+            color: #1a2a3a;
+            width: 100%;
         }
         
-        .nav-links {
+        h1 {
+            font-size: clamp(4rem, 10vw, 8rem);
+            letter-spacing: 2vw;
+            margin: 0;
+            margin-left: 2vw; /* Kompensasi letter-spacing agar tetap di tengah */
+            font-weight: 800;
+            text-transform: uppercase;
+            text-shadow: 0 10px 30px rgba(255, 255, 255, 0.8), 0 2px 4px rgba(0,0,0,0.1);
+            opacity: 0;
+            animation: fadeUp 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation-delay: 0.5s;
+            transition: transform 0.5s ease, letter-spacing 0.5s ease;
+            cursor: pointer;
+        }
+        
+        h1:hover {
+            transform: scale(1.02);
+            letter-spacing: 2.2vw;
+        }
+        
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            letter-spacing: 8px;
+            margin-top: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            opacity: 0;
+            animation: fadeUp 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation-delay: 1s;
+            color: #2c3e50;
+        }
+        
+        /* UI HUD bergaya Agency */
+        .ui-borders {
             position: absolute;
+            top: 40px;
+            left: 40px;
+            right: 40px;
             bottom: 40px;
-            display: flex;
-            gap: 40px;
+            border: 1px solid rgba(26, 42, 58, 0.15);
+            z-index: 3;
+            pointer-events: none;
+        }
+        
+        .corner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #1a2a3a;
+        }
+        .top-left { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+        .top-right { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+        .bottom-left { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+        .bottom-right { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+        
+        .hud-text {
+            position: absolute;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #1a2a3a;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        .hud-top-left { top: 20px; left: 20px; }
+        .hud-bottom-right { bottom: 20px; right: 20px; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn-explore {
+            margin-top: 50px;
+            padding: 15px 40px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(26, 42, 58, 0.3);
+            color: #1a2a3a;
+            font-size: 1rem;
+            font-weight: bold;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            border-radius: 4px;
+            opacity: 0;
+            animation: fadeUp 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation-delay: 1.5s;
             pointer-events: auto;
         }
         
-        .nav-link {
-            color: rgba(255,255,255,0.5);
-            text-decoration: none;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 3px;
-            transition: color 0.3s, text-shadow 0.3s;
-        }
-        
-        .nav-link:hover {
-            color: #fff;
-            text-shadow: 0 0 10px rgba(255,255,255,0.8);
+        .btn-explore:hover {
+            background: #1a2a3a;
+            color: white;
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            border-color: transparent;
         }
     </style>
-    <!-- WebGL & Animation Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
-
-    <div id="loading">INITIALIZING GEOMETRY...</div>
+    <div class="background-container" id="bg"></div>
+    <div class="overlay"></div>
     
-    <div id="ui-layer">
-        <h1 id="trigger">MONAS</h1>
-        <div class="subtitle">NATIONAL MONUMENT OF INDONESIA</div>
-        
-        <div class="nav-links">
-            <a href="#" class="nav-link">Discover</a>
-            <a href="#" class="nav-link">History</a>
-            <a href="#" class="nav-link">Visit</a>
-        </div>
+    <div class="ui-borders">
+        <div class="corner top-left"></div>
+        <div class="corner top-right"></div>
+        <div class="corner bottom-left"></div>
+        <div class="corner bottom-right"></div>
+        <div class="hud-text hud-top-left">LOC: JAKARTA, ID // ELEV: 132M</div>
+        <div class="hud-text hud-bottom-right">TRUE VISUAL FLY-IN ACTIVE</div>
+    </div>
+
+    <div class="content">
+        <h1>MONAS</h1>
+        <div class="subtitle">Monumen Nasional Indonesia</div>
+        <button class="btn-explore">Jelajahi</button>
     </div>
 
     <script>
-        // --- 1. SETUP ---
-        const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x030305, 0.015);
-        
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        document.body.appendChild(renderer.domElement);
-
-        const monasGroup = new THREE.Group();
-        scene.add(monasGroup);
-
-        // --- 2. PROCEDURAL MONAS GEOMETRY ---
-        // Materials
-        const wireMat = new THREE.LineBasicMaterial({ 
-            color: 0x4488ff, 
-            transparent: true, 
-            opacity: 0.6,
-            blending: THREE.AdditiveBlending 
-        });
-        
-        const goldMat = new THREE.LineBasicMaterial({ 
-            color: 0xffaa00, 
-            transparent: true, 
-            opacity: 0.9,
-            blending: THREE.AdditiveBlending 
-        });
-
-        // Helper function for tapered shapes (Cawan, Tugu)
-        function createTapered(rTop, rBottom, height, yPos, mat) {
-            const geo = new THREE.CylinderGeometry(rTop, rBottom, height, 4, 1, false, Math.PI / 4);
-            const edges = new THREE.EdgesGeometry(geo);
-            const line = new THREE.LineSegments(edges, mat);
-            line.position.y = yPos;
-            return line;
-        }
-
-        // Helper function for boxes (Base)
-        function createBox(w, h, d, yPos, mat) {
-            const geo = new THREE.BoxGeometry(w, h, d);
-            const edges = new THREE.EdgesGeometry(geo);
-            const line = new THREE.LineSegments(edges, mat);
-            line.position.y = yPos;
-            return line;
-        }
-
-        // Building Monas (Approximate Proportions)
-        
-        // 1. Pelataran Bawah (Base)
-        monasGroup.add(createBox(20, 1, 20, 0, wireMat));
-        monasGroup.add(createBox(18, 0.5, 18, 0.75, wireMat));
-        
-        // 2. Cawan (Cup/Lower platform)
-        monasGroup.add(createTapered(6, 4, 5, 3.5, wireMat));
-        monasGroup.add(createBox(8.5, 0.5, 8.5, 6.25, wireMat)); // Pelataran atas
-        
-        // 3. Tugu (Obelisk)
-        // Tall tapering pillar
-        monasGroup.add(createTapered(1.5, 2.5, 25, 19, wireMat));
-        
-        // 4. Lidah Api (Flame of Independence)
-        monasGroup.add(createTapered(2.5, 1, 1, 32, goldMat)); // Flame base
-        monasGroup.add(createTapered(0.1, 2.5, 4, 34.5, goldMat)); // Flame body
-        monasGroup.add(createTapered(0, 1.5, 2, 37.5, goldMat)); // Flame tip
-        
-        // Create an inner glow for the flame
-        const flameCoreGeo = new THREE.CylinderGeometry(0, 1, 5, 4, 1, false, Math.PI/4);
-        const flameCoreMat = new THREE.MeshBasicMaterial({ 
-            color: 0xffdd44, 
-            transparent: true, 
-            opacity: 0.2, 
-            blending: THREE.AdditiveBlending 
-        });
-        const flameCore = new THREE.Mesh(flameCoreGeo, flameCoreMat);
-        flameCore.position.y = 35;
-        monasGroup.add(flameCore);
-
-        // Center the group
-        monasGroup.position.y = -15;
-
-        // --- 3. PARTICLES / CONSTELLATION ---
-        const particlesCount = 2000;
-        const posArray = new Float32Array(particlesCount * 3);
-        const velocityArray = [];
-
-        for(let i = 0; i < particlesCount * 3; i+=3) {
-            // Cylinder distribution around Monas
-            const r = 5 + Math.random() * 40;
-            const theta = 2 * Math.PI * Math.random();
-            const y = (Math.random() - 0.5) * 80;
-            
-            posArray[i] = r * Math.cos(theta);
-            posArray[i+1] = y;
-            posArray[i+2] = r * Math.sin(theta);
-            
-            velocityArray.push({
-                x: (Math.random() - 0.5) * 0.02,
-                y: (Math.random() - 0.5) * 0.02,
-                z: (Math.random() - 0.5) * 0.02
-            });
-        }
-        
-        const particlesGeometry = new THREE.BufferGeometry();
-        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-        
-        // Soft particle texture
-        const canvas = document.createElement('canvas');
-        canvas.width = 16; canvas.height = 16;
-        const context = canvas.getContext('2d');
-        const gradient = context.createRadialGradient(8, 8, 0, 8, 8, 8);
-        gradient.addColorStop(0, 'rgba(255,255,255,1)');
-        gradient.addColorStop(1, 'rgba(0,0,0,0)');
-        context.fillStyle = gradient;
-        context.fillRect(0, 0, 16, 16);
-        const particleTexture = new THREE.CanvasTexture(canvas);
-
-        const particlesMaterial = new THREE.PointsMaterial({
-            size: 0.3, 
-            map: particleTexture, 
-            transparent: true,
-            blending: THREE.AdditiveBlending, 
-            depthWrite: false, 
-            color: 0x88aaff,
-            opacity: 0.5
-        });
-        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-        scene.add(particlesMesh);
-
-        // --- 4. INTERACTION & PARALLAX ---
+        // Efek Parallax menggunakan pergerakan mouse yang halus
+        const bg = document.getElementById('bg');
         let mouseX = 0;
         let mouseY = 0;
-        let targetX = 0;
-        let targetY = 0;
+        let currentX = 0;
+        let currentY = 0;
         
-        const windowHalfX = window.innerWidth / 2;
-        const windowHalfY = window.innerHeight / 2;
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
 
-        document.addEventListener('mousemove', (event) => {
-            mouseX = (event.clientX - windowHalfX);
-            mouseY = (event.clientY - windowHalfY);
+        document.addEventListener('mousemove', (e) => {
+            // Normalisasi posisi mouse dari -0.5 ke 0.5
+            mouseX = (e.clientX / windowWidth) - 0.5;
+            mouseY = (e.clientY / windowHeight) - 0.5;
         });
-
-        // Interactive Title Hover
-        const title = document.getElementById('trigger');
-        title.addEventListener('mouseenter', () => {
-            gsap.to(wireMat, { color: 0xffaa00, opacity: 1, duration: 1 });
-            gsap.to(particlesMaterial.color, { r: 1, g: 0.7, b: 0.2, duration: 1 });
-        });
-        title.addEventListener('mouseleave', () => {
-            gsap.to(wireMat, { color: 0x4488ff, opacity: 0.6, duration: 1 });
-            gsap.to(particlesMaterial.color, { r: 0.53, g: 0.66, b: 1, duration: 1 });
-        });
-
-        // --- 5. ANIMATION SEQUENCE ---
-        camera.position.set(0, -20, 10);
-        camera.lookAt(0, 10, 0);
-
+        
+        // Animasi zoom lambat saat pertama kali dimuat (Cinematic fly-in)
+        let isZooming = true;
+        bg.style.transition = 'transform 10s cubic-bezier(0.25, 1, 0.5, 1)';
+        bg.style.transform = 'scale(1.05)';
+        
         setTimeout(() => {
-            document.getElementById('loading').style.opacity = '0';
-            
-            // Camera cinematic fly-in
-            gsap.to(camera.position, { 
-                z: 60, 
-                y: 5, 
-                duration: 4, 
-                ease: "power3.inOut" 
-            });
-            
-            gsap.to(monasGroup.rotation, {
-                y: Math.PI * 2,
-                duration: 5,
-                ease: "power2.out"
-            });
-            
-            setTimeout(() => {
-                document.getElementById('ui-layer').style.opacity = '1';
-                document.getElementById('loading').style.display = 'none';
-            }, 2500);
-            
-        }, 1500);
+            isZooming = false;
+            bg.style.transition = 'none'; // Matikan transisi CSS agar JS bisa ambil alih
+        }, 10000);
 
-        const clock = new THREE.Clock();
-
+        // Render loop untuk interpolasi gerakan (Liquid Parallax)
         function animate() {
             requestAnimationFrame(animate);
-            const elapsedTime = clock.getElapsedTime();
-
-            // Liquid Parallax
-            targetX = mouseX * 0.001;
-            targetY = mouseY * 0.001;
             
-            monasGroup.rotation.y += 0.002; // Base rotation
-            monasGroup.rotation.y += (targetX - monasGroup.rotation.y + elapsedTime*0.1) * 0.05; // Mouse influence
-            monasGroup.rotation.x = targetY * 0.2;
-            
-            // Flame subtle pulse
-            flameCore.scale.x = 1 + Math.sin(elapsedTime * 5) * 0.1;
-            flameCore.scale.z = 1 + Math.sin(elapsedTime * 5) * 0.1;
-
-            // Particles logic
-            const positions = particlesGeometry.attributes.position.array;
-            for(let i = 0; i < particlesCount; i++) {
-                let i3 = i * 3;
+            if (!isZooming) {
+                // Lerp (Linear Interpolation) untuk gerakan yang sangat halus
+                currentX += (mouseX * 40 - currentX) * 0.05;
+                currentY += (mouseY * 40 - currentY) * 0.05;
                 
-                positions[i3] += velocityArray[i].x;
-                positions[i3+1] += velocityArray[i].y;
-                positions[i3+2] += velocityArray[i].z;
-                
-                // Slowly rotate particles
-                const x = positions[i3];
-                const z = positions[i3+2];
-                positions[i3] = x * Math.cos(0.001) - z * Math.sin(0.001);
-                positions[i3+2] = z * Math.cos(0.001) + x * Math.sin(0.001);
-                
-                // Bounds
-                if (positions[i3+1] > 40) positions[i3+1] = -40;
-                if (positions[i3+1] < -40) positions[i3+1] = 40;
+                bg.style.transform = `translate(${-currentX}px, ${-currentY}px) scale(1.05)`;
             }
-            particlesGeometry.attributes.position.needsUpdate = true;
-            
-            // Camera subtle follow
-            camera.position.x += (targetX * 20 - camera.position.x) * 0.02;
-            camera.position.y += (-targetY * 10 - camera.position.y + 5) * 0.02;
-            camera.lookAt(0, 10, 0);
-
-            renderer.render(scene, camera);
         }
-
+        
         animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
     </script>
 </body>
 </html>
