@@ -3,134 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Builder</title>
+    <title>Monas 3D Experience</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #020205; font-family: 'Inter', -apple-system, sans-serif; }
-        canvas { display: block; }
-        #ui-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            pointer-events: none; z-index: 10; opacity: 0; transition: opacity 2s;
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background-color: #030305; 
+            font-family: 'Inter', -apple-system, sans-serif; 
+            color: white;
         }
-        h1 {
-            color: #ffffff; font-size: 5vw; letter-spacing: 0.8vw; font-weight: 200;
-            text-transform: uppercase; margin: 0; pointer-events: auto;
-            text-shadow: 0 0 30px rgba(255,255,255,0.2); cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        canvas { 
+            display: block; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            z-index: 1; 
         }
-        h1:hover { letter-spacing: 1.2vw; text-shadow: 0 0 50px rgba(255,255,255,0.5); }
-        .subtitle {
-            color: #666; letter-spacing: 4px; font-size: 0.9rem; margin-top: 20px;
-            text-transform: uppercase;
-        }
-        #intro-screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #020205; z-index: 20; display: flex; justify-content: center; align-items: center;
-            color: #333; font-family: monospace; letter-spacing: 5px; text-transform: uppercase;
-            transition: opacity 1.5s ease-out; pointer-events: none;
-        }
-        .glitch { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; text-shadow: 0 0 10px #fff; } 100% { opacity: 0.5; } }
         
-        /* Tambahan CSS untuk Tombol Kontak 3D */
-        .contact-container {
-            margin-top: 40px;
-            display: flex;
-            gap: 24px;
-            pointer-events: auto; /* Mengaktifkan klik */
+        #ui-layer {
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center;
+            pointer-events: none; 
+            z-index: 10; 
+            opacity: 0; 
         }
-        .btn-3d {
-            position: relative;
-            padding: 12px 28px;
-            font-family: monospace;
-            font-size: 0.85rem;
-            letter-spacing: 3px;
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px); /* Efek kaca */
-            border-radius: 2px;
-            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            overflow: hidden;
-            text-transform: uppercase;
+        
+        h1 {
+            font-size: clamp(3rem, 8vw, 7rem); 
+            letter-spacing: 2vw; 
+            font-weight: 100;
+            text-transform: uppercase; 
+            margin: 0; 
+            margin-left: 2vw; /* offset for tracking */
+            pointer-events: auto;
+            text-shadow: 0 0 40px rgba(255, 215, 0, 0.3); 
+            cursor: pointer;
+            transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            background: linear-gradient(180deg, #ffffff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .btn-3d::before {
-            content: '';
+        
+        h1:hover { 
+            letter-spacing: 2.5vw; 
+            text-shadow: 0 0 60px rgba(255, 215, 0, 0.8); 
+            transform: scale(1.05);
+        }
+        
+        .subtitle {
+            letter-spacing: 8px; 
+            font-size: clamp(0.7rem, 1.5vw, 1rem); 
+            margin-top: 20px;
+            text-transform: uppercase; 
+            font-weight: 300;
+            color: #888;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 20px;
+        }
+
+        #loading {
             position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.6s ease;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: monospace;
+            letter-spacing: 5px;
+            color: #ffaa00;
+            z-index: 20;
+            transition: opacity 1s;
         }
-        .btn-3d:hover::before {
-            left: 100%;
+        
+        .nav-links {
+            position: absolute;
+            bottom: 40px;
+            display: flex;
+            gap: 40px;
+            pointer-events: auto;
         }
-        .btn-3d:hover {
+        
+        .nav-link {
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            transition: color 0.3s, text-shadow 0.3s;
+        }
+        
+        .nav-link:hover {
             color: #fff;
-            transform: translateY(-5px) scale(1.05); /* Efek melayang 3D */
-            background: rgba(255, 255, 255, 0.05);
-        }
-        /* Glow spesifik WA */
-        .btn-wa:hover {
-            border-color: rgba(37, 211, 102, 0.6);
-            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.2), inset 0 0 15px rgba(37, 211, 102, 0.1);
-            text-shadow: 0 0 10px rgba(37, 211, 102, 0.8);
-        }
-        /* Glow spesifik Email */
-        .btn-email:hover {
-            border-color: rgba(234, 67, 53, 0.6);
-            box-shadow: 0 10px 30px rgba(234, 67, 53, 0.2), inset 0 0 15px rgba(234, 67, 53, 0.1);
-            text-shadow: 0 0 10px rgba(234, 67, 53, 0.8);
+            text-shadow: 0 0 10px rgba(255,255,255,0.8);
         }
     </style>
+    <!-- WebGL & Animation Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
 
-    <div id="intro-screen"><span class="glitch">Initializing AAA Engine...</span></div>
+    <div id="loading">INITIALIZING GEOMETRY...</div>
     
     <div id="ui-layer">
-        <h1 id="trigger">WEBSITE BUILDER</h1>
-        <div class="subtitle">SYAHPUR BACHTIAR</div>
+        <h1 id="trigger">MONAS</h1>
+        <div class="subtitle">NATIONAL MONUMENT OF INDONESIA</div>
         
-        <!-- Tambahan HTML Tombol Kontak -->
-        <div class="contact-container">
-            <a href="https://wa.me/6281398788960" target="_blank" class="btn-3d btn-wa">WhatsApp</a>
-            <a href="mailto:syahpurbachtiar@gmail.com" class="btn-3d btn-email">Email</a>
+        <div class="nav-links">
+            <a href="#" class="nav-link">Discover</a>
+            <a href="#" class="nav-link">History</a>
+            <a href="#" class="nav-link">Visit</a>
         </div>
     </div>
 
     <script>
-        // --- 1. CORE SETUP ---
+        // --- 1. SETUP ---
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x020205, 0.0015);
+        scene.fog = new THREE.FogExp2(0x030305, 0.015);
         
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.body.appendChild(renderer.domElement);
 
-        // --- 2. AAA WIREFRAME INTRO (The "Core") ---
-        const coreGeometry = new THREE.IcosahedronGeometry(15, 2);
-        const coreMaterial = new THREE.MeshBasicMaterial({ 
-            color: 0x445577, wireframe: true, transparent: true, opacity: 0 
-        });
-        const core = new THREE.Mesh(coreGeometry, coreMaterial);
-        scene.add(core);
+        const monasGroup = new THREE.Group();
+        scene.add(monasGroup);
 
-        // --- 3. CURSOR PARTICLES (Constellation) ---
-        const particlesGeometry = new THREE.BufferGeometry();
-        const particlesCount = 3000;
+        // --- 2. PROCEDURAL MONAS GEOMETRY ---
+        // Materials
+        const wireMat = new THREE.LineBasicMaterial({ 
+            color: 0x4488ff, 
+            transparent: true, 
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending 
+        });
+        
+        const goldMat = new THREE.LineBasicMaterial({ 
+            color: 0xffaa00, 
+            transparent: true, 
+            opacity: 0.9,
+            blending: THREE.AdditiveBlending 
+        });
+
+        // Helper function for tapered shapes (Cawan, Tugu)
+        function createTapered(rTop, rBottom, height, yPos, mat) {
+            const geo = new THREE.CylinderGeometry(rTop, rBottom, height, 4, 1, false, Math.PI / 4);
+            const edges = new THREE.EdgesGeometry(geo);
+            const line = new THREE.LineSegments(edges, mat);
+            line.position.y = yPos;
+            return line;
+        }
+
+        // Helper function for boxes (Base)
+        function createBox(w, h, d, yPos, mat) {
+            const geo = new THREE.BoxGeometry(w, h, d);
+            const edges = new THREE.EdgesGeometry(geo);
+            const line = new THREE.LineSegments(edges, mat);
+            line.position.y = yPos;
+            return line;
+        }
+
+        // Building Monas (Approximate Proportions)
+        
+        // 1. Pelataran Bawah (Base)
+        monasGroup.add(createBox(20, 1, 20, 0, wireMat));
+        monasGroup.add(createBox(18, 0.5, 18, 0.75, wireMat));
+        
+        // 2. Cawan (Cup/Lower platform)
+        monasGroup.add(createTapered(6, 4, 5, 3.5, wireMat));
+        monasGroup.add(createBox(8.5, 0.5, 8.5, 6.25, wireMat)); // Pelataran atas
+        
+        // 3. Tugu (Obelisk)
+        // Tall tapering pillar
+        monasGroup.add(createTapered(1.5, 2.5, 25, 19, wireMat));
+        
+        // 4. Lidah Api (Flame of Independence)
+        monasGroup.add(createTapered(2.5, 1, 1, 32, goldMat)); // Flame base
+        monasGroup.add(createTapered(0.1, 2.5, 4, 34.5, goldMat)); // Flame body
+        monasGroup.add(createTapered(0, 1.5, 2, 37.5, goldMat)); // Flame tip
+        
+        // Create an inner glow for the flame
+        const flameCoreGeo = new THREE.CylinderGeometry(0, 1, 5, 4, 1, false, Math.PI/4);
+        const flameCoreMat = new THREE.MeshBasicMaterial({ 
+            color: 0xffdd44, 
+            transparent: true, 
+            opacity: 0.2, 
+            blending: THREE.AdditiveBlending 
+        });
+        const flameCore = new THREE.Mesh(flameCoreGeo, flameCoreMat);
+        flameCore.position.y = 35;
+        monasGroup.add(flameCore);
+
+        // Center the group
+        monasGroup.position.y = -15;
+
+        // --- 3. PARTICLES / CONSTELLATION ---
+        const particlesCount = 2000;
         const posArray = new Float32Array(particlesCount * 3);
         const velocityArray = [];
 
-        for(let i = 0; i < particlesCount * 3; i++) {
-            posArray[i] = (Math.random() - 0.5) * 150;
-        }
-        for(let i = 0; i < particlesCount; i++) {
+        for(let i = 0; i < particlesCount * 3; i+=3) {
+            // Cylinder distribution around Monas
+            const r = 5 + Math.random() * 40;
+            const theta = 2 * Math.PI * Math.random();
+            const y = (Math.random() - 0.5) * 80;
+            
+            posArray[i] = r * Math.cos(theta);
+            posArray[i+1] = y;
+            posArray[i+2] = r * Math.sin(theta);
+            
             velocityArray.push({
                 x: (Math.random() - 0.5) * 0.02,
                 y: (Math.random() - 0.5) * 0.02,
@@ -138,55 +225,33 @@
             });
         }
         
+        const particlesGeometry = new THREE.BufferGeometry();
         particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
         
-        // Custom texture for particles to make them soft (no external image needed)
+        // Soft particle texture
         const canvas = document.createElement('canvas');
         canvas.width = 16; canvas.height = 16;
         const context = canvas.getContext('2d');
         const gradient = context.createRadialGradient(8, 8, 0, 8, 8, 8);
         gradient.addColorStop(0, 'rgba(255,255,255,1)');
-        gradient.addColorStop(1, 'rgba(255,255,255,0)');
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
         context.fillStyle = gradient;
         context.fillRect(0, 0, 16, 16);
         const particleTexture = new THREE.CanvasTexture(canvas);
 
         const particlesMaterial = new THREE.PointsMaterial({
-            size: 0.3, map: particleTexture, transparent: true,
-            blending: THREE.AdditiveBlending, depthWrite: false, color: 0x88aaff
+            size: 0.3, 
+            map: particleTexture, 
+            transparent: true,
+            blending: THREE.AdditiveBlending, 
+            depthWrite: false, 
+            color: 0x88aaff,
+            opacity: 0.5
         });
         const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(particlesMesh);
 
-        // --- 4. BUTTERFLIES (Flock) ---
-        const butterflies = [];
-        const butterflyGeo = new THREE.PlaneGeometry(0.5, 0.5, 2, 2); // Simple wing representation
-        const butterflyMat = new THREE.MeshBasicMaterial({ 
-            color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.8,
-            wireframe: true
-        });
-
-        function spawnButterfly(x, y) {
-            const b = new THREE.Mesh(butterflyGeo, butterflyMat);
-            // Convert screen mouse to world pos roughly
-            const vector = new THREE.Vector3(x, y, 0.5);
-            vector.unproject(camera);
-            const dir = vector.sub(camera.position).normalize();
-            const distance = -camera.position.z / dir.z;
-            const pos = camera.position.clone().add(dir.multiplyScalar(distance));
-            
-            b.position.copy(pos);
-            b.userData = {
-                angle: Math.random() * Math.PI * 2,
-                speed: 0.02 + Math.random() * 0.03,
-                flapSpeed: 0.2 + Math.random() * 0.2,
-                life: 1.0
-            };
-            scene.add(b);
-            butterflies.push(b);
-        }
-
-        // --- 5. INTERACTION & PARALLAX ---
+        // --- 4. INTERACTION & PARALLAX ---
         let mouseX = 0;
         let mouseY = 0;
         let targetX = 0;
@@ -198,47 +263,46 @@
         document.addEventListener('mousemove', (event) => {
             mouseX = (event.clientX - windowHalfX);
             mouseY = (event.clientY - windowHalfY);
-            
-            // Normalize for Raycaster/Butterflies
-            const normX = (event.clientX / window.innerWidth) * 2 - 1;
-            const normY = -(event.clientY / window.innerHeight) * 2 + 1;
-            
-            // Randomly spawn butterfly on fast movement or hover
-            if (Math.random() > 0.95) spawnButterfly(normX, normY);
         });
 
-        // Hover Effect on Title
+        // Interactive Title Hover
         const title = document.getElementById('trigger');
         title.addEventListener('mouseenter', () => {
-            gsap.to(particlesMaterial.color, { r: 1, g: 0.2, b: 0.4, duration: 1 });
-            coreMaterial.wireframe = false;
-            coreMaterial.opacity = 0.1;
+            gsap.to(wireMat, { color: 0xffaa00, opacity: 1, duration: 1 });
+            gsap.to(particlesMaterial.color, { r: 1, g: 0.7, b: 0.2, duration: 1 });
         });
         title.addEventListener('mouseleave', () => {
+            gsap.to(wireMat, { color: 0x4488ff, opacity: 0.6, duration: 1 });
             gsap.to(particlesMaterial.color, { r: 0.53, g: 0.66, b: 1, duration: 1 });
-            coreMaterial.wireframe = true;
-            coreMaterial.opacity = 0.3;
         });
 
-        // --- 6. ANIMATION & AAA INTRO SEQUENCE ---
-        camera.position.z = 5;
+        // --- 5. ANIMATION SEQUENCE ---
+        camera.position.set(0, -20, 10);
+        camera.lookAt(0, 10, 0);
 
-        // Cinematic Intro
         setTimeout(() => {
-            document.getElementById('intro-screen').style.opacity = '0';
+            document.getElementById('loading').style.opacity = '0';
             
-            gsap.to(coreMaterial, { opacity: 0.3, duration: 2, ease: "power2.inOut" });
-            gsap.fromTo(camera.position, 
-                { z: 0.1, y: -20 }, 
-                { z: 40, y: 0, duration: 3.5, ease: "power3.out" }
-            );
+            // Camera cinematic fly-in
+            gsap.to(camera.position, { 
+                z: 60, 
+                y: 5, 
+                duration: 4, 
+                ease: "power3.inOut" 
+            });
+            
+            gsap.to(monasGroup.rotation, {
+                y: Math.PI * 2,
+                duration: 5,
+                ease: "power2.out"
+            });
             
             setTimeout(() => {
                 document.getElementById('ui-layer').style.opacity = '1';
-            }, 2000);
+                document.getElementById('loading').style.display = 'none';
+            }, 2500);
             
         }, 1500);
-
 
         const clock = new THREE.Clock();
 
@@ -246,64 +310,49 @@
             requestAnimationFrame(animate);
             const elapsedTime = clock.getElapsedTime();
 
-            // Parallax
+            // Liquid Parallax
             targetX = mouseX * 0.001;
             targetY = mouseY * 0.001;
             
-            camera.position.x += (targetX * 20 - camera.position.x) * 0.05;
-            camera.position.y += (-targetY * 20 - camera.position.y) * 0.05;
-            camera.lookAt(scene.position);
+            monasGroup.rotation.y += 0.002; // Base rotation
+            monasGroup.rotation.y += (targetX - monasGroup.rotation.y + elapsedTime*0.1) * 0.05; // Mouse influence
+            monasGroup.rotation.x = targetY * 0.2;
+            
+            // Flame subtle pulse
+            flameCore.scale.x = 1 + Math.sin(elapsedTime * 5) * 0.1;
+            flameCore.scale.z = 1 + Math.sin(elapsedTime * 5) * 0.1;
 
-            // Core rotation
-            core.rotation.y += 0.002;
-            core.rotation.x += 0.001;
-
-            // Particles logic (follow cursor slightly)
+            // Particles logic
             const positions = particlesGeometry.attributes.position.array;
             for(let i = 0; i < particlesCount; i++) {
                 let i3 = i * 3;
-                // Add velocity
+                
                 positions[i3] += velocityArray[i].x;
                 positions[i3+1] += velocityArray[i].y;
                 positions[i3+2] += velocityArray[i].z;
                 
-                // Subtle attraction to center based on mouse
-                positions[i3] -= targetX * 0.1;
-                positions[i3+1] -= targetY * 0.1;
+                // Slowly rotate particles
+                const x = positions[i3];
+                const z = positions[i3+2];
+                positions[i3] = x * Math.cos(0.001) - z * Math.sin(0.001);
+                positions[i3+2] = z * Math.cos(0.001) + x * Math.sin(0.001);
                 
-                // Boundary check to loop
-                if (Math.abs(positions[i3]) > 75) positions[i3] *= -0.9;
-                if (Math.abs(positions[i3+1]) > 75) positions[i3+1] *= -0.9;
-                if (Math.abs(positions[i3+2]) > 75) positions[i3+2] *= -0.9;
+                // Bounds
+                if (positions[i3+1] > 40) positions[i3+1] = -40;
+                if (positions[i3+1] < -40) positions[i3+1] = 40;
             }
             particlesGeometry.attributes.position.needsUpdate = true;
-            particlesMesh.rotation.y = -targetX * 0.5;
-
-            // Butterflies animation
-            for (let i = butterflies.length - 1; i >= 0; i--) {
-                const b = butterflies[i];
-                b.userData.angle += 0.05;
-                b.position.y += b.userData.speed;
-                b.position.x += Math.sin(b.userData.angle) * 0.02;
-                
-                // Simulate wings flapping via scale
-                b.scale.y = Math.sin(elapsedTime * 10 * b.userData.flapSpeed);
-                
-                b.userData.life -= 0.005;
-                b.material.opacity = b.userData.life;
-                
-                if (b.userData.life <= 0) {
-                    scene.remove(b);
-                    butterflies.splice(i, 1);
-                }
-            }
+            
+            // Camera subtle follow
+            camera.position.x += (targetX * 20 - camera.position.x) * 0.02;
+            camera.position.y += (-targetY * 10 - camera.position.y + 5) * 0.02;
+            camera.lookAt(0, 10, 0);
 
             renderer.render(scene, camera);
         }
 
         animate();
 
-        // Handle Resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
@@ -312,3 +361,5 @@
     </script>
 </body>
 </html>
+
+print("File generated: monas_3d_experience.html")
