@@ -3,87 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Builder</title>
+    <title>Website Builder - Syahpur Bachtiar</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #020205; font-family: 'Inter', -apple-system, sans-serif; }
-        canvas { display: block; }
+        body { margin: 0; overflow: hidden; background-color: #010103; font-family: 'Inter', -apple-system, sans-serif; }
+        canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
+        
         #ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            pointer-events: none; z-index: 10; opacity: 0; transition: opacity 2s;
+            pointer-events: none; z-index: 10; opacity: 0; transition: opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1);
         }
+        
         h1 {
-            color: #ffffff; font-size: 5vw; letter-spacing: 0.8vw; font-weight: 200;
+            color: #ffffff; font-size: clamp(3rem, 6vw, 8rem); letter-spacing: 1vw; font-weight: 100;
             text-transform: uppercase; margin: 0; pointer-events: auto;
-            text-shadow: 0 0 30px rgba(255,255,255,0.2); cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            text-shadow: 0 0 40px rgba(255,255,255,0.3); cursor: pointer;
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            text-align: center;
         }
-        h1:hover { letter-spacing: 1.2vw; text-shadow: 0 0 50px rgba(255,255,255,0.5); }
+        h1:hover { 
+            letter-spacing: 1.5vw; 
+            text-shadow: 0 0 60px rgba(255,255,255,0.8), 0 0 20px rgba(136, 170, 255, 0.5); 
+            transform: scale(1.02);
+        }
+        
         .subtitle {
-            color: #666; letter-spacing: 4px; font-size: 0.9rem; margin-top: 20px;
-            text-transform: uppercase;
+            color: #888; letter-spacing: 6px; font-size: clamp(0.8rem, 2vw, 1.2rem); margin-top: 20px;
+            text-transform: uppercase; font-weight: 300;
+            background: linear-gradient(90deg, #fff, #88aaff, #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s infinite linear;
         }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+
         #intro-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #020205; z-index: 20; display: flex; justify-content: center; align-items: center;
-            color: #333; font-family: monospace; letter-spacing: 5px; text-transform: uppercase;
-            transition: opacity 1.5s ease-out; pointer-events: none;
+            background: #010103; z-index: 20; display: flex; justify-content: center; align-items: center;
+            color: #555; font-family: monospace; letter-spacing: 8px; text-transform: uppercase;
+            transition: opacity 2s ease-out; pointer-events: none;
         }
-        .glitch { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; text-shadow: 0 0 10px #fff; } 100% { opacity: 0.5; } }
         
-        /* Tambahan CSS untuk Tombol Kontak 3D */
+        .glitch { animation: pulse 2s infinite; font-size: 0.9rem; }
+        @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; text-shadow: 0 0 15px rgba(255,255,255,0.5); } 100% { opacity: 0.3; } }
+        
+        /* Tombol Kontak 3D Elegan */
         .contact-container {
-            margin-top: 40px;
+            margin-top: 50px;
             display: flex;
-            gap: 24px;
-            pointer-events: auto; /* Mengaktifkan klik */
+            gap: 30px;
+            pointer-events: auto;
         }
+        
         .btn-3d {
             position: relative;
-            padding: 12px 28px;
+            padding: 15px 35px;
             font-family: monospace;
-            font-size: 0.85rem;
-            letter-spacing: 3px;
-            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            letter-spacing: 4px;
+            color: rgba(255, 255, 255, 0.6);
             text-decoration: none;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px); /* Efek kaca */
-            border-radius: 2px;
-            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border-radius: 4px;
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
             overflow: hidden;
             text-transform: uppercase;
         }
+        
         .btn-3d::before {
             content: '';
             position: absolute;
             top: 0; left: -100%;
             width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.6s ease;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s ease;
         }
-        .btn-3d:hover::before {
-            left: 100%;
-        }
+        
+        .btn-3d:hover::before { left: 100%; }
+        
         .btn-3d:hover {
             color: #fff;
-            transform: translateY(-5px) scale(1.05); /* Efek melayang 3D */
-            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-8px) scale(1.05);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.3);
         }
-        /* Glow spesifik WA */
+        
+        /* WA Glow */
         .btn-wa:hover {
-            border-color: rgba(37, 211, 102, 0.6);
-            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.2), inset 0 0 15px rgba(37, 211, 102, 0.1);
-            text-shadow: 0 0 10px rgba(37, 211, 102, 0.8);
+            box-shadow: 0 15px 40px rgba(37, 211, 102, 0.25), inset 0 0 20px rgba(37, 211, 102, 0.15);
+            text-shadow: 0 0 12px rgba(37, 211, 102, 0.9);
+            border-color: rgba(37, 211, 102, 0.5);
         }
-        /* Glow spesifik Email */
+        
+        /* Email Glow */
         .btn-email:hover {
-            border-color: rgba(234, 67, 53, 0.6);
-            box-shadow: 0 10px 30px rgba(234, 67, 53, 0.2), inset 0 0 15px rgba(234, 67, 53, 0.1);
-            text-shadow: 0 0 10px rgba(234, 67, 53, 0.8);
+            box-shadow: 0 15px 40px rgba(234, 67, 53, 0.25), inset 0 0 20px rgba(234, 67, 53, 0.15);
+            text-shadow: 0 0 12px rgba(234, 67, 53, 0.9);
+            border-color: rgba(234, 67, 53, 0.5);
         }
     </style>
+    <!-- WebGL & Animation Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
@@ -95,7 +120,6 @@
         <h1 id="trigger">WEBSITE BUILDER</h1>
         <div class="subtitle">SYAHPUR BACHTIAR</div>
         
-        <!-- Tambahan HTML Tombol Kontak -->
         <div class="contact-container">
             <a href="https://wa.me/6281398788960" target="_blank" class="btn-3d btn-wa">WhatsApp</a>
             <a href="mailto:syahpurbachtiar@gmail.com" class="btn-3d btn-email">Email</a>
@@ -103,87 +127,113 @@
     </div>
 
     <script>
-        // --- 1. CORE SETUP ---
+        // --- 1. CORE SCENE SETUP ---
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x020205, 0.0015);
+        scene.fog = new THREE.FogExp2(0x010103, 0.0012); // Fog lebih tebal di kejauhan untuk depth
         
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.body.appendChild(renderer.domElement);
 
-        // --- 2. AAA WIREFRAME INTRO (The "Core") ---
-        const coreGeometry = new THREE.IcosahedronGeometry(15, 2);
-        const coreMaterial = new THREE.MeshBasicMaterial({ 
-            color: 0x445577, wireframe: true, transparent: true, opacity: 0 
-        });
-        const core = new THREE.Mesh(coreGeometry, coreMaterial);
-        scene.add(core);
+        // --- 2. THE CORE (Layered Wireframes) ---
+        const coreGroup = new THREE.Group();
+        scene.add(coreGroup);
 
-        // --- 3. CURSOR PARTICLES (Constellation) ---
+        // Outer Core
+        const outerGeo = new THREE.IcosahedronGeometry(18, 2);
+        const outerMat = new THREE.MeshBasicMaterial({ 
+            color: 0x223355, wireframe: true, transparent: true, opacity: 0 
+        });
+        const outerCore = new THREE.Mesh(outerGeo, outerMat);
+        coreGroup.add(outerCore);
+
+        // Inner Core (Bikin efek parallax 3D berlapis)
+        const innerGeo = new THREE.IcosahedronGeometry(12, 1);
+        const innerMat = new THREE.MeshBasicMaterial({ 
+            color: 0x4466aa, wireframe: true, transparent: true, opacity: 0 
+        });
+        const innerCore = new THREE.Mesh(innerGeo, innerMat);
+        coreGroup.add(innerCore);
+
+        // --- 3. DYNAMIC PARTICLE GALAXY ---
         const particlesGeometry = new THREE.BufferGeometry();
-        const particlesCount = 3000;
+        const particlesCount = 4500; // Partikel diperbanyak untuk kesan mewah
         const posArray = new Float32Array(particlesCount * 3);
         const velocityArray = [];
+        const phaseArray = new Float32Array(particlesCount); // Untuk efek kelap-kelip
 
-        for(let i = 0; i < particlesCount * 3; i++) {
-            posArray[i] = (Math.random() - 0.5) * 150;
-        }
-        for(let i = 0; i < particlesCount; i++) {
+        for(let i = 0; i < particlesCount * 3; i+=3) {
+            // Distribusi spherical untuk efek galaksi
+            const r = 30 + Math.random() * 120;
+            const theta = 2 * Math.PI * Math.random();
+            const phi = Math.acos(2 * Math.random() - 1);
+            
+            posArray[i] = r * Math.sin(phi) * Math.cos(theta);
+            posArray[i+1] = r * Math.sin(phi) * Math.sin(theta);
+            posArray[i+2] = r * Math.cos(phi);
+            
             velocityArray.push({
-                x: (Math.random() - 0.5) * 0.02,
-                y: (Math.random() - 0.5) * 0.02,
-                z: (Math.random() - 0.5) * 0.02
+                x: (Math.random() - 0.5) * 0.015,
+                y: (Math.random() - 0.5) * 0.015,
+                z: (Math.random() - 0.5) * 0.015
             });
+            phaseArray[i/3] = Math.random() * Math.PI * 2;
         }
         
         particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        particlesGeometry.setAttribute('phase', new THREE.BufferAttribute(phaseArray, 1));
         
-        // Custom texture for particles to make them soft (no external image needed)
+        // Texture bintang yang sangat lembut (Generate via Canvas)
         const canvas = document.createElement('canvas');
-        canvas.width = 16; canvas.height = 16;
+        canvas.width = 32; canvas.height = 32;
         const context = canvas.getContext('2d');
-        const gradient = context.createRadialGradient(8, 8, 0, 8, 8, 8);
+        const gradient = context.createRadialGradient(16, 16, 0, 16, 16, 16);
         gradient.addColorStop(0, 'rgba(255,255,255,1)');
-        gradient.addColorStop(1, 'rgba(255,255,255,0)');
+        gradient.addColorStop(0.2, 'rgba(136, 170, 255, 0.8)');
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
         context.fillStyle = gradient;
-        context.fillRect(0, 0, 16, 16);
+        context.fillRect(0, 0, 32, 32);
         const particleTexture = new THREE.CanvasTexture(canvas);
 
         const particlesMaterial = new THREE.PointsMaterial({
-            size: 0.3, map: particleTexture, transparent: true,
-            blending: THREE.AdditiveBlending, depthWrite: false, color: 0x88aaff
+            size: 0.4, 
+            map: particleTexture, 
+            transparent: true,
+            blending: THREE.AdditiveBlending, 
+            depthWrite: false, 
+            color: 0xffffff,
+            opacity: 0.6
         });
         const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(particlesMesh);
 
-        // --- 4. BUTTERFLIES (Flock) ---
-        const butterflies = [];
-        const butterflyGeo = new THREE.PlaneGeometry(0.5, 0.5, 2, 2); // Simple wing representation
-        const butterflyMat = new THREE.MeshBasicMaterial({ 
-            color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.8,
-            wireframe: true
+        // --- 4. GLOWING ANOMALIES (Sparks instead of literal butterflies) ---
+        const sparks = [];
+        const sparkGeo = new THREE.PlaneGeometry(0.8, 0.2); 
+        const sparkMat = new THREE.MeshBasicMaterial({ 
+            color: 0x88aaff, side: THREE.DoubleSide, transparent: true, opacity: 0.8,
+            blending: THREE.AdditiveBlending, depthWrite: false
         });
 
-        function spawnButterfly(x, y) {
-            const b = new THREE.Mesh(butterflyGeo, butterflyMat);
-            // Convert screen mouse to world pos roughly
+        function spawnSpark(x, y) {
+            const s = new THREE.Mesh(sparkGeo, sparkMat);
             const vector = new THREE.Vector3(x, y, 0.5);
             vector.unproject(camera);
             const dir = vector.sub(camera.position).normalize();
             const distance = -camera.position.z / dir.z;
             const pos = camera.position.clone().add(dir.multiplyScalar(distance));
             
-            b.position.copy(pos);
-            b.userData = {
-                angle: Math.random() * Math.PI * 2,
-                speed: 0.02 + Math.random() * 0.03,
-                flapSpeed: 0.2 + Math.random() * 0.2,
-                life: 1.0
+            s.position.copy(pos);
+            s.rotation.z = Math.random() * Math.PI;
+            s.userData = {
+                velocity: new THREE.Vector3((Math.random()-0.5)*0.2, (Math.random()-0.5)*0.2, Math.random()*0.1),
+                life: 1.0,
+                decay: 0.01 + Math.random() * 0.02
             };
-            scene.add(b);
-            butterflies.push(b);
+            scene.add(s);
+            sparks.push(s);
         }
 
         // --- 5. INTERACTION & PARALLAX ---
@@ -199,46 +249,46 @@
             mouseX = (event.clientX - windowHalfX);
             mouseY = (event.clientY - windowHalfY);
             
-            // Normalize for Raycaster/Butterflies
             const normX = (event.clientX / window.innerWidth) * 2 - 1;
             const normY = -(event.clientY / window.innerHeight) * 2 + 1;
             
-            // Randomly spawn butterfly on fast movement or hover
-            if (Math.random() > 0.95) spawnButterfly(normX, normY);
+            // Spawn sparks on fast movement
+            if (Math.random() > 0.92) spawnSpark(normX, normY);
         });
 
-        // Hover Effect on Title
+        // Cinematic Hover Effect on Title
         const title = document.getElementById('trigger');
         title.addEventListener('mouseenter', () => {
-            gsap.to(particlesMaterial.color, { r: 1, g: 0.2, b: 0.4, duration: 1 });
-            coreMaterial.wireframe = false;
-            coreMaterial.opacity = 0.1;
+            gsap.to(particlesMaterial.color, { r: 1, g: 0.4, b: 0.6, duration: 1.5, ease: "power2.out" });
+            gsap.to(outerMat, { opacity: 0.05, duration: 1 });
+            gsap.to(innerMat, { opacity: 0.15, duration: 1 });
         });
         title.addEventListener('mouseleave', () => {
-            gsap.to(particlesMaterial.color, { r: 0.53, g: 0.66, b: 1, duration: 1 });
-            coreMaterial.wireframe = true;
-            coreMaterial.opacity = 0.3;
+            gsap.to(particlesMaterial.color, { r: 1, g: 1, b: 1, duration: 1.5, ease: "power2.in" });
+            gsap.to(outerMat, { opacity: 0.15, duration: 1 });
+            gsap.to(innerMat, { opacity: 0.25, duration: 1 });
         });
 
-        // --- 6. ANIMATION & AAA INTRO SEQUENCE ---
-        camera.position.z = 5;
+        // --- 6. AAA ANIMATION SEQUENCE ---
+        camera.position.z = 2;
 
-        // Cinematic Intro
         setTimeout(() => {
-            document.getElementById('intro-screen').style.opacity = '0';
+            const intro = document.getElementById('intro-screen');
+            intro.style.opacity = '0';
             
-            gsap.to(coreMaterial, { opacity: 0.3, duration: 2, ease: "power2.inOut" });
-            gsap.fromTo(camera.position, 
-                { z: 0.1, y: -20 }, 
-                { z: 40, y: 0, duration: 3.5, ease: "power3.out" }
-            );
+            // Kamera mundur secara sinematik
+            gsap.to(camera.position, { z: 50, duration: 4, ease: "power3.out" });
+            
+            // Wireframe memudar masuk
+            gsap.to(outerMat, { opacity: 0.15, duration: 3, ease: "power2.inOut", delay: 0.5 });
+            gsap.to(innerMat, { opacity: 0.25, duration: 3, ease: "power2.inOut", delay: 0.8 });
             
             setTimeout(() => {
                 document.getElementById('ui-layer').style.opacity = '1';
-            }, 2000);
+                intro.style.display = 'none';
+            }, 2500);
             
-        }, 1500);
-
+        }, 1800);
 
         const clock = new THREE.Clock();
 
@@ -246,55 +296,59 @@
             requestAnimationFrame(animate);
             const elapsedTime = clock.getElapsedTime();
 
-            // Parallax
-            targetX = mouseX * 0.001;
-            targetY = mouseY * 0.001;
+            // Liquid Parallax
+            targetX = mouseX * 0.0015;
+            targetY = mouseY * 0.0015;
             
-            camera.position.x += (targetX * 20 - camera.position.x) * 0.05;
-            camera.position.y += (-targetY * 20 - camera.position.y) * 0.05;
+            camera.position.x += (targetX * 25 - camera.position.x) * 0.03;
+            camera.position.y += (-targetY * 25 - camera.position.y) * 0.03;
             camera.lookAt(scene.position);
 
-            // Core rotation
-            core.rotation.y += 0.002;
-            core.rotation.x += 0.001;
+            // Multi-layered Core rotation
+            outerCore.rotation.y += 0.001;
+            outerCore.rotation.x += 0.0005;
+            outerCore.rotation.z -= 0.0008;
+            
+            innerCore.rotation.y -= 0.002;
+            innerCore.rotation.x -= 0.001;
 
-            // Particles logic (follow cursor slightly)
+            // Fluid Particles logic
             const positions = particlesGeometry.attributes.position.array;
             for(let i = 0; i < particlesCount; i++) {
                 let i3 = i * 3;
-                // Add velocity
+                
                 positions[i3] += velocityArray[i].x;
                 positions[i3+1] += velocityArray[i].y;
                 positions[i3+2] += velocityArray[i].z;
                 
-                // Subtle attraction to center based on mouse
-                positions[i3] -= targetX * 0.1;
-                positions[i3+1] -= targetY * 0.1;
+                // Mouse attraction
+                positions[i3] -= targetX * 0.05;
+                positions[i3+1] -= targetY * 0.05;
                 
-                // Boundary check to loop
-                if (Math.abs(positions[i3]) > 75) positions[i3] *= -0.9;
-                if (Math.abs(positions[i3+1]) > 75) positions[i3+1] *= -0.9;
-                if (Math.abs(positions[i3+2]) > 75) positions[i3+2] *= -0.9;
+                // Soft boundary loop
+                if (Math.abs(positions[i3]) > 150) positions[i3] *= -0.95;
+                if (Math.abs(positions[i3+1]) > 150) positions[i3+1] *= -0.95;
+                if (Math.abs(positions[i3+2]) > 150) positions[i3+2] *= -0.95;
             }
             particlesGeometry.attributes.position.needsUpdate = true;
-            particlesMesh.rotation.y = -targetX * 0.5;
+            
+            // Subtle galaxy rotation
+            particlesMesh.rotation.y = elapsedTime * 0.05;
+            particlesMesh.rotation.z = Math.sin(elapsedTime * 0.1) * 0.1;
 
-            // Butterflies animation
-            for (let i = butterflies.length - 1; i >= 0; i--) {
-                const b = butterflies[i];
-                b.userData.angle += 0.05;
-                b.position.y += b.userData.speed;
-                b.position.x += Math.sin(b.userData.angle) * 0.02;
+            // Sparks animation (Replacing butterflies with elegant light streaks)
+            for (let i = sparks.length - 1; i >= 0; i--) {
+                const s = sparks[i];
+                s.position.add(s.userData.velocity);
+                s.rotation.z += 0.1;
+                s.scale.x = s.userData.life * 2;
                 
-                // Simulate wings flapping via scale
-                b.scale.y = Math.sin(elapsedTime * 10 * b.userData.flapSpeed);
+                s.userData.life -= s.userData.decay;
+                s.material.opacity = s.userData.life;
                 
-                b.userData.life -= 0.005;
-                b.material.opacity = b.userData.life;
-                
-                if (b.userData.life <= 0) {
-                    scene.remove(b);
-                    butterflies.splice(i, 1);
+                if (s.userData.life <= 0) {
+                    scene.remove(s);
+                    sparks.splice(i, 1);
                 }
             }
 
@@ -303,7 +357,6 @@
 
         animate();
 
-        // Handle Resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
@@ -312,3 +365,5 @@
     </script>
 </body>
 </html>
+
+print("File generated: website_builder_elegant_3d.html")
