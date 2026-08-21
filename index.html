@@ -1,0 +1,256 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellar Experience - Three.js</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #020205; font-family: 'Inter', -apple-system, sans-serif; }
+        canvas { display: block; }
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            pointer-events: none; z-index: 10; opacity: 0; transition: opacity 2s;
+        }
+        h1 {
+            color: #ffffff; font-size: 5vw; letter-spacing: 0.8vw; font-weight: 200;
+            text-transform: uppercase; margin: 0; pointer-events: auto;
+            text-shadow: 0 0 30px rgba(255,255,255,0.2); cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        h1:hover { letter-spacing: 1.2vw; text-shadow: 0 0 50px rgba(255,255,255,0.5); }
+        .subtitle {
+            color: #666; letter-spacing: 4px; font-size: 0.9rem; margin-top: 20px;
+            text-transform: uppercase;
+        }
+        #intro-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #020205; z-index: 20; display: flex; justify-content: center; align-items: center;
+            color: #333; font-family: monospace; letter-spacing: 5px; text-transform: uppercase;
+            transition: opacity 1.5s ease-out; pointer-events: none;
+        }
+        .glitch { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; text-shadow: 0 0 10px #fff; } 100% { opacity: 0.5; } }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+
+    <div id="intro-screen"><span class="glitch">Initializing AAA Engine...</span></div>
+    
+    <div id="ui-layer">
+        <h1 id="trigger">Enter The Void</h1>
+        <div class="subtitle">Interact to summon anomalies</div>
+    </div>
+
+    <script>
+        // --- 1. CORE SETUP ---
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x020205, 0.0015);
+        
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        document.body.appendChild(renderer.domElement);
+
+        // --- 2. AAA WIREFRAME INTRO (The "Core") ---
+        const coreGeometry = new THREE.IcosahedronGeometry(15, 2);
+        const coreMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0x445577, wireframe: true, transparent: true, opacity: 0 
+        });
+        const core = new THREE.Mesh(coreGeometry, coreMaterial);
+        scene.add(core);
+
+        // --- 3. CURSOR PARTICLES (Constellation) ---
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 3000;
+        const posArray = new Float32Array(particlesCount * 3);
+        const velocityArray = [];
+
+        for(let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 150;
+        }
+        for(let i = 0; i < particlesCount; i++) {
+            velocityArray.push({
+                x: (Math.random() - 0.5) * 0.02,
+                y: (Math.random() - 0.5) * 0.02,
+                z: (Math.random() - 0.5) * 0.02
+            });
+        }
+        
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        
+        // Custom texture for particles to make them soft (no external image needed)
+        const canvas = document.createElement('canvas');
+        canvas.width = 16; canvas.height = 16;
+        const context = canvas.getContext('2d');
+        const gradient = context.createRadialGradient(8, 8, 0, 8, 8, 8);
+        gradient.addColorStop(0, 'rgba(255,255,255,1)');
+        gradient.addColorStop(1, 'rgba(255,255,255,0)');
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, 16, 16);
+        const particleTexture = new THREE.CanvasTexture(canvas);
+
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.3, map: particleTexture, transparent: true,
+            blending: THREE.AdditiveBlending, depthWrite: false, color: 0x88aaff
+        });
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        // --- 4. BUTTERFLIES (Flock) ---
+        const butterflies = [];
+        const butterflyGeo = new THREE.PlaneGeometry(0.5, 0.5, 2, 2); // Simple wing representation
+        const butterflyMat = new THREE.MeshBasicMaterial({ 
+            color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.8,
+            wireframe: true
+        });
+
+        function spawnButterfly(x, y) {
+            const b = new THREE.Mesh(butterflyGeo, butterflyMat);
+            // Convert screen mouse to world pos roughly
+            const vector = new THREE.Vector3(x, y, 0.5);
+            vector.unproject(camera);
+            const dir = vector.sub(camera.position).normalize();
+            const distance = -camera.position.z / dir.z;
+            const pos = camera.position.clone().add(dir.multiplyScalar(distance));
+            
+            b.position.copy(pos);
+            b.userData = {
+                angle: Math.random() * Math.PI * 2,
+                speed: 0.02 + Math.random() * 0.03,
+                flapSpeed: 0.2 + Math.random() * 0.2,
+                life: 1.0
+            };
+            scene.add(b);
+            butterflies.push(b);
+        }
+
+        // --- 5. INTERACTION & PARALLAX ---
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetX = 0;
+        let targetY = 0;
+        
+        const windowHalfX = window.innerWidth / 2;
+        const windowHalfY = window.innerHeight / 2;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX - windowHalfX);
+            mouseY = (event.clientY - windowHalfY);
+            
+            // Normalize for Raycaster/Butterflies
+            const normX = (event.clientX / window.innerWidth) * 2 - 1;
+            const normY = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            // Randomly spawn butterfly on fast movement or hover
+            if (Math.random() > 0.95) spawnButterfly(normX, normY);
+        });
+
+        // Hover Effect on Title
+        const title = document.getElementById('trigger');
+        title.addEventListener('mouseenter', () => {
+            gsap.to(particlesMaterial.color, { r: 1, g: 0.2, b: 0.4, duration: 1 });
+            coreMaterial.wireframe = false;
+            coreMaterial.opacity = 0.1;
+        });
+        title.addEventListener('mouseleave', () => {
+            gsap.to(particlesMaterial.color, { r: 0.53, g: 0.66, b: 1, duration: 1 });
+            coreMaterial.wireframe = true;
+            coreMaterial.opacity = 0.3;
+        });
+
+        // --- 6. ANIMATION & AAA INTRO SEQUENCE ---
+        camera.position.z = 5;
+
+        // Cinematic Intro
+        setTimeout(() => {
+            document.getElementById('intro-screen').style.opacity = '0';
+            
+            gsap.to(coreMaterial, { opacity: 0.3, duration: 2, ease: "power2.inOut" });
+            gsap.fromTo(camera.position, 
+                { z: 0.1, y: -20 }, 
+                { z: 40, y: 0, duration: 3.5, ease: "power3.out" }
+            );
+            
+            setTimeout(() => {
+                document.getElementById('ui-layer').style.opacity = '1';
+            }, 2000);
+            
+        }, 1500);
+
+
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+
+            // Parallax
+            targetX = mouseX * 0.001;
+            targetY = mouseY * 0.001;
+            
+            camera.position.x += (targetX * 20 - camera.position.x) * 0.05;
+            camera.position.y += (-targetY * 20 - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
+
+            // Core rotation
+            core.rotation.y += 0.002;
+            core.rotation.x += 0.001;
+
+            // Particles logic (follow cursor slightly)
+            const positions = particlesGeometry.attributes.position.array;
+            for(let i = 0; i < particlesCount; i++) {
+                let i3 = i * 3;
+                // Add velocity
+                positions[i3] += velocityArray[i].x;
+                positions[i3+1] += velocityArray[i].y;
+                positions[i3+2] += velocityArray[i].z;
+                
+                // Subtle attraction to center based on mouse
+                positions[i3] -= targetX * 0.1;
+                positions[i3+1] -= targetY * 0.1;
+                
+                // Boundary check to loop
+                if (Math.abs(positions[i3]) > 75) positions[i3] *= -0.9;
+                if (Math.abs(positions[i3+1]) > 75) positions[i3+1] *= -0.9;
+                if (Math.abs(positions[i3+2]) > 75) positions[i3+2] *= -0.9;
+            }
+            particlesGeometry.attributes.position.needsUpdate = true;
+            particlesMesh.rotation.y = -targetX * 0.5;
+
+            // Butterflies animation
+            for (let i = butterflies.length - 1; i >= 0; i--) {
+                const b = butterflies[i];
+                b.userData.angle += 0.05;
+                b.position.y += b.userData.speed;
+                b.position.x += Math.sin(b.userData.angle) * 0.02;
+                
+                // Simulate wings flapping via scale
+                b.scale.y = Math.sin(elapsedTime * 10 * b.userData.flapSpeed);
+                
+                b.userData.life -= 0.005;
+                b.material.opacity = b.userData.life;
+                
+                if (b.userData.life <= 0) {
+                    scene.remove(b);
+                    butterflies.splice(i, 1);
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
