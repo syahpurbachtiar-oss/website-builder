@@ -1,97 +1,75 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MONAS — Tugu Nasional dalam 3D</title>
-<meta name="description" content="Jelajahi Monumen Nasional Jakarta dengan foto asli, latar parallax 3D, model interaktif, dan galeri tilt 3D." />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
+Build a full-screen hero landing page for a creative agency called "Mainframe" using React, TypeScript, Vite, and Tailwind CSS. Here is every detail:
 
-  <canvas id="scene"></canvas>
+---
 
-  <div id="photoHero" class="photo-hero">
-    <img id="photoHeroImg" src="https://commons.wikimedia.org/wiki/Special:FilePath/The%20National%20Monument%20(Monas),%20Jakarta%20from%20afar.jpg?width=1800" alt="Monumen Nasional, Jakarta" />
-    <div class="photo-hero__scrim"></div>
-  </div>
+FONTS
 
-  <div class="grain"></div>
+Load two fonts in `index.html` via these stylesheet links:
+- Heading: `https://db.onlinewebfonts.com/c/5ac3fe7c6abd2f62067f266d89671492?family=HelveticaNowDisplay-Medium`
+- Body: `https://db.onlinewebfonts.com/c/1aa3377e489837a26d019bba501e779d?family=HelveticaNowDisplayW01-Rg`
 
-  <nav class="nav">
-    <span class="nav__mark">01°N · MONAS</span>
-    <div class="nav__links">
-      <a href="#kisah">Kisah</a>
-      <a href="#nyala">Nyala Api</a>
-      <a href="#jelajah">Jelajah</a>
-      <a href="#galeri">Galeri</a>
-    </div>
-  </nav>
+In `index.css`, define CSS variables:
+```css
+:root {
+  --font-heading: 'HelveticaNowDisplay-Medium', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'HelveticaNowDisplayW01-Rg', 'Helvetica Neue', Arial, sans-serif;
+}
+body {
+  font-family: var(--font-body);
+}
+```
 
-  <main>
+The entire page uses `var(--font-body)` except the logo text which uses `var(--font-heading)`.
 
-    <section class="section section--hero" id="hero">
-      <p class="eyebrow">Jakarta, Indonesia — sejak 1961</p>
-      <h1 class="hero__title">MONAS</h1>
-      <p class="hero__sub">132 meter menjulang di jantung Jakarta — dituangkan dalam marmer Lampung, disepuh lidah api dari 35&nbsp;kg emas. Gerakkan kursor, lalu gulir ke bawah.</p>
-      <div class="scrollcue">
-        <span></span>
-        <em>gulir</em>
-      </div>
-    </section>
+---
 
-    <section class="section section--text" id="kisah">
-      <span class="tag">Kisah — 01</span>
-      <h2>Dituangkan dari perjuangan, bukan sekadar batu.</h2>
-      <p>Diresmikan pembangunannya oleh Presiden Soekarno pada 17 Agustus 1961, Monas berdiri sebagai tugu peringatan perjuangan kemerdekaan Indonesia. Bentuknya — alu dan lesung — diambil dari alat rumah tangga leluhur: lambang kesuburan dan ketahanan.</p>
-      <p>Di kaki tugu, relief diorama membentang mengelilingi ruang museum, menuturkan perjalanan bangsa dari masa kerajaan hingga proklamasi.</p>
-    </section>
+BACKGROUND VIDEO (mouse-scrub controlled)
 
-    <section class="section section--text section--right" id="nyala">
-      <span class="tag">Kisah — 02</span>
-      <h2>Lidah Api Kemerdekaan.</h2>
-      <p>Di puncaknya, cawan perunggu menopang lidah api setinggi 14 meter, disepuh lembaran emas seberat sekitar 35 kilogram — diperbarui dan ditambah emasnya menjelang peringatan kemerdekaan ke-50 pada 1995.</p>
-      <p>Nyala ini tak pernah padam dalam makna: simbol semangat juang yang terus menyala.</p>
-    </section>
+- A full-screen `<video>` element is `position: fixed; inset: 0; z-index: 0; object-fit: cover; object-position: 70% center;`.
+- Video source URL: `https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_041744_63efcd78-bf7d-4039-99e2-2461e8a61903.mp4`
+- The video is `muted`, `playsInline`, `preload="auto"`. It does NOT autoplay.
+- The video scrubs forward/backward based on horizontal mouse movement. Use a `mousemove` event listener on `window`. Track `prevX`, compute `delta = currentX - prevX`, convert to a time offset: `(delta / window.innerWidth) * SENSITIVITY * video.duration` where `SENSITIVITY = 0.8`. Clamp `targetTime` between 0 and `video.duration`. Use `video.currentTime` to seek, and an `onSeeked` handler to queue the next seek if `targetTime` has moved, preventing seek-flooding.
 
-    <section class="section section--explore" id="jelajah">
-      <span class="tag">Jelajah — interaktif</span>
-      <h2>Sentuh, seret, putar.</h2>
-      <p class="explore__hint">Model 3D berdiri di depan foto asli Monas — bebas diputar dari segala sisi selama di bagian ini.</p>
-      <ul class="facts">
-        <li><strong>132&nbsp;m</strong><span>tinggi total tugu</span></li>
-        <li><strong>17.8.61</strong><span>peletakan batu pertama</span></li>
-        <li><strong>35&nbsp;kg</strong><span>emas pada lidah api</span></li>
-        <li><strong>115&nbsp;m</strong><span>ketinggian pelataran puncak</span></li>
-      </ul>
-    </section>
+---
 
-    <section class="section section--gallery" id="galeri">
-      <span class="tag">Galeri — foto asli</span>
-      <h2>Monas, dari berbagai sudut.</h2>
-      <p class="explore__hint">Gerakkan kursor atau jari di atas tiap foto untuk memiringkannya dalam 3D.</p>
-      <div class="tilt-grid" id="tiltGrid"></div>
-    </section>
+**NAVBAR (fixed, z-index: 10)**
 
-    <footer class="section section--footer">
-      <p class="footer__line">Dibangun dalam WebGL &amp; Three.js — sebuah penghormatan digital untuk Monas.</p>
-      <p class="footer__meta">Tugu Monumen Nasional · Jakarta Pusat, DKI Jakarta</p>
-      <p class="footer__credits" id="photoCredits"></p>
-    </footer>
+- Fixed to top, full width. Padding: `px-5 sm:px-8 py-4 sm:py-5`. Flex row, `justify-between`, `items-center`.
+- **Logo (left):** Flex row with `gap-3`. Text "Mainframe(R)" (use the registered trademark symbol) at `text-[21px] sm:text-[26px]`, `tracking-tight`, white, using `var(--font-heading)`. Beside it, a decorative asterisk character `✳︎` at `text-[25px] sm:text-[30px]`, white, `select-none`, `letter-spacing: -0.02em`.
+- **Desktop nav links (center, hidden below md):** Flex row, `text-[23px]`, white. Links: "Labs", "Studio", "Openings", "Shop" separated by commas rendered as `, `. Each link has `hover:opacity-60 transition-opacity`.
+- **Desktop CTA (right, hidden below md):** An anchor "Get in touch" at `text-[23px]`, white, `underline underline-offset-2`, `hover:opacity-60 transition-opacity`.
+- **Mobile hamburger (visible below md):** A button with 3 horizontal bars (each `w-6 h-[2px] bg-white`), spaced with `gap-[5px]`. On toggle, the top bar rotates 45deg and translates down 7px, middle bar fades to opacity 0, bottom bar rotates -45deg and translates up 7px. All transitions are `duration-300`.
+- **Mobile overlay (z-index: 9):** `fixed inset-0 bg-black/90 backdrop-blur-md`, flex column, vertically centered, left-aligned with `px-8 gap-8`. Same links at `text-[32px] font-medium`, plus "Get in touch" underlined. Fades in/out with `opacity` and `pointerEvents` toggled. Hidden on md+.
 
-  </main>
+---
 
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-    }
-  }
-  </script>
-  <script type="module" src="script.js"></script>
-</body>
-</html>
+**HERO SECTION (z-index: 1)**
+
+- Full `h-screen`, flex column. On mobile: `justify-end pb-12`. On `md:`: `justify-center pb-0`. Horizontal padding: `px-5 sm:px-8 md:px-10`. `overflow-hidden`.
+- Content container: `max-w-xl`, `relative z-10`.
+
+**1. Blurred intro label:**
+- `pointer-events-none`, `select-none`, `mb-5 sm:mb-6`.
+- Font size: `clamp(18px, 4vw, 26px)`, `line-height: 1.3`, `font-weight: 400`, `color: #fff`, `filter: blur(4px)`.
+- Two lines of text:
+  - Line 1: "Hey there, meet A.R.I.A,"
+  - Line 2: "Mainframe's Adaptive Response Interface Agent"
+- Separated by a `<br>`.
+
+**2. Typewriter text:**
+- Text: `"Glad you stopped in. Good taste tends to find us. Now, what are we building?"`
+- Custom `useTypewriter` hook: takes `text`, `speed` (default 38ms per character), `startDelay` (default 600ms). After the delay, an interval reveals one character at a time. Returns `{ displayed, done }`.
+- Rendered in a `<p>` tag, white, `mb-5 sm:mb-6`, font size `clamp(18px, 4vw, 26px)`, `line-height: 1.35`, `font-weight: 400`, `min-height: 54px`.
+- While typing, show a blinking cursor: `inline-block w-[2px] h-[1.1em] bg-white align-middle ml-[2px]` with CSS animation `blink 1s step-end infinite` (`opacity: 1 at 0%/100%, 0 at 50%`). Cursor disappears when `done` is true.
+
+**3. Action pill buttons:**
+- Appear with a fade-in + slide-up animation (`opacity 0->1`, `translateY(8px)->0`, `transition: opacity 0.4s ease, transform 0.4s ease`). They become visible 400ms after page load, independent of the typewriter animation (do NOT wait for typing to finish).
+- Container: `flex flex-wrap gap-y-1`.
+- **4 white pill buttons:** Labels: "Pitch us an idea", "Come work here", "Send a brief hello", "See how we operate". Each is `inline-flex items-center justify-center bg-white text-black border border-black/10 rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] white-space: nowrap`. Hover: `bg-black text-white`, `transition-colors duration-200`.
+- **1 outline pill button:** Text "Reach us: hello@mainframe.co" (email is underlined with `underline-offset-1`), followed by a small 12x12 copy icon (inline SVG of two overlapping rectangles). Styled: `text-white bg-transparent border border-white rounded-full`, same sizing as above, with `gap-2 sm:gap-3` between text and icon. Hover: `bg-white text-black`. On click, copies "hello@mainframe.co" to clipboard via `navigator.clipboard.writeText()`.
+
+---
+
+DEPENDENCIES
+
+Only React, ReactDOM, Tailwind CSS, and Vite. No other UI libraries. Lucide-react is available but not used in this component.
